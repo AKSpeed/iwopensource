@@ -27,6 +27,7 @@
 //                 accordingly.                                               //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 - AK' Added IW 15.0.1  & xe10 Berlin                         //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -42,8 +43,12 @@ interface
 {$I IWVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl,
+  Windows, Messages, SysUtils, Classes,  IWControl,
+  {$IF CompilerVersion < 27.0} //CompilerVersion: Extended = 31 Xe10;   VER270 = xe6
+   Controls,
+  {$IFEND}
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, {$ENDIF}
+  {$IFDEF IWVERSION150} IWBaseHTMLComponent, {$ENDIF} //IWBaseRenderContext
   {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
   IWHTMLTag;
 
@@ -69,13 +74,17 @@ type
   public
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
     constructor Create(AOwner: TComponent); override;
   published
     property SourceURL : string read FSourceURL write FSourceURL;
@@ -141,12 +150,16 @@ begin
   end;
   Result.Contents.AddTag('Your browser does not support IFRAMES...');
 end;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWEmbeddedHTML.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWEmbeddedHTML.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //72
+ {$IFDEF IWVERSION150} //15
+   function TArcIWEmbeddedHTML.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+    function TArcIWEmbeddedHTML.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+    function TArcIWEmbeddedHTML.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 begin
   Result := TIWHTMLTag.CreateTag('IFRAME');
   Result.AddStringParam('SRC',FSourceURL);
@@ -183,7 +196,7 @@ begin
   end;
   Result.Contents.AddTag('Your browser does not support IFRAMES...');
 end;
-{$ENDIF}
+{$ENDIF}//72
 
 end.
 

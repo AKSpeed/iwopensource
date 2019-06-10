@@ -19,6 +19,7 @@
 //    07/27/2002 - Released to TArcIWOperaMemo to Open Source.                //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 IW 15.0.1 Opera v17 components not supported! AK'            //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -34,7 +35,10 @@ interface
 {$I IWVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWCompMemo, IWTypes,
+  Windows, Messages, SysUtils, Classes, IWControl, IWCompMemo, IWTypes,
+  {$IF CompilerVersion < 27.0} //CompilerVersion: Extended = 31 Xe10;   VER270 = xe6
+   Controls,
+  {$IFEND}
   ArcIWOperaFix,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
@@ -47,23 +51,34 @@ type
   public
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
+{$IFNDEF IWVERSION150} // TIWAppForm <<= TIWBaseForm
     constructor Create(AOwner: TComponent); override;
+{$ENDIF} //72
   published
   end;
 
 implementation
 
-uses IWAppForm;
+uses
+{$IFDEF IWVERSION150} ArcIWBrowserDummy, IWBaseForm, {$ENDIF} //, IW.Common.SysTools,
+IWAppForm;
 
 { TArcIWOperaMemo }
 
+{$IFNDEF IWVERSION150} // TIWAppForm <<= TIWBaseForm
+//v15 deprecated
+//    property SupportedBrowsers: TIWBrowsersDummy write SetSupportedBrowsers;
 constructor TArcIWOperaMemo.Create(AOwner: TComponent);
 var
   browsers : TIWBrowsers;
@@ -79,6 +94,7 @@ begin
     end;
   end;
 end;
+{$ENDIF}
 
 {$IFDEF IWVERCLASS5}
 function TArcIWOperaMemo.RenderHTML: TIWHTMLTag;
@@ -88,15 +104,21 @@ begin
   else
     Result := inherited RenderHTML;
 end;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWOperaMemo.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWOperaMemo.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWOperaMemo.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWOperaMemo.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWOperaMemo.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 begin
   Result := inherited RenderHTML(AContext);
 end;
 {$ENDIF}
 
 end.
+
+

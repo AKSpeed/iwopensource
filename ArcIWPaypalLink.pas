@@ -37,6 +37,7 @@
 //    08/02/2002 - Released ArcIWPaypalLink to Open Source                    //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 - AK' Added IW 15.0.1  & xe10 Berlin                         //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -52,7 +53,10 @@ interface
 {$I IWVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl,
+  Windows, Messages, SysUtils, Classes, IWControl,
+  {$IF CompilerVersion < 27.0} //CompilerVersion: Extended = 31 Xe10;   VER270 = xe6
+   Controls,
+  {$IFEND}
   ArcIWOperaFix,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
@@ -62,24 +66,24 @@ type
   TArcIWDefImageDonation = (dfdRounded, dfdCCDButton, dfdPaypal, dfdStandard);
 const
   ArcIWDefImageDonationURL : array[0..3] of string = (
-                     'https://www.paypal.com/images/x-click-but21.gif',
-                     'https://www.paypal.com/images/x-click-butcc-donate.gif',
-                     'https://www.paypal.com/images/x-click-but04.gif',
-                     'https://www.paypal.com/images/x-click-but11.gif');
+		     'https://www.paypal.com/images/x-click-but21.gif',
+		     'https://www.paypal.com/images/x-click-butcc-donate.gif',
+		     'https://www.paypal.com/images/x-click-but04.gif',
+		     'https://www.paypal.com/images/x-click-but11.gif');
   ArcIWDefImageDonationX : array[0..3] of Integer = (110, 73, 62, 60);
   ArcIWDefImageDonationY : array[0..3] of Integer = (23,  44, 31, 23);
 
 type
   TArcIWDefImageSubscription = (dfsCCDButton1, dfsCCDButton2, dfsPaypal1,
-                                dfsPaypal2, dfsRounded, dfsStandard);
+				dfsPaypal2, dfsRounded, dfsStandard);
 const
   ArcIWDefImageSubscriptionURL : array[0..5] of string = (
-                     'https://www.paypal.com/images/x-click-butcc-subscribe.gif',
-                     'https://www.paypal.com/images/x-click-butcc.gif',
-                     'https://www.paypal.com/images/x-click-but20.gif',
-                     'https://www.paypal.com/images/x-click-but06.gif',
-                     'https://www.paypal.com/images/x-click-but24.gif',
-                     'https://www.paypal.com/images/x-click-but12.gif');
+		     'https://www.paypal.com/images/x-click-butcc-subscribe.gif',
+		     'https://www.paypal.com/images/x-click-butcc.gif',
+		     'https://www.paypal.com/images/x-click-but20.gif',
+		     'https://www.paypal.com/images/x-click-but06.gif',
+		     'https://www.paypal.com/images/x-click-but24.gif',
+		     'https://www.paypal.com/images/x-click-but12.gif');
   ArcIWDefImageSubscriptionX : array[0..5] of Integer = (73, 73, 62, 62, 76, 84);
   ArcIWDefImageSubscriptionY : array[0..5] of Integer = (44, 44, 31, 31, 23, 23);
 
@@ -179,13 +183,17 @@ type
   public
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
   published
     property DonationID : string read FDonationID write FDonationID;
     property DonationText : string read FDonationText write FDonationText;
@@ -219,13 +227,17 @@ type
     procedure ResizeSelf; override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
   published
     property DefaultImage : TArcIWDefImageSubscriptionCancel read FDefaultImage write SetDefaultImage;
   end;
@@ -255,13 +267,17 @@ type
     constructor Create(AOwner : TComponent); override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
     destructor Destroy; override;
   published
     property SubscriptionID : string read FSubscriptionID write FSubscriptionID;
@@ -296,13 +312,17 @@ type
     constructor Create(AOwner : TComponent); override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
     destructor Destroy; override;
   published
     property ItemID : string read FItemID write FItemID;
@@ -326,13 +346,17 @@ type
     constructor Create(AOwner : TComponent); override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
   published
     property DefaultImage : TArcIWDefImageViewCart read FDefaultImage write SetDefaultImage;
   end;
@@ -354,13 +378,17 @@ type
     constructor Create(AOwner : TComponent); override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
     destructor Destroy; override;
   published
     property ItemID : string read FItemID write FItemID;
@@ -444,12 +472,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWPayPalDonation.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWPayPalDonation.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWPayPalDonation.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWPayPalDonation.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWPayPalDonation.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWPayPalDonation.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 begin
   result := TIWHTMLTag.CreateTag('form');
@@ -593,12 +625,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWPayPalSubscription.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWPayPalSubscription.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWPayPalSubscription.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWPayPalSubscription.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWPayPalSubscription.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWPayPalSubscription.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 var
   sURL : string;
@@ -843,12 +879,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWPayPalItemPurchase.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWPayPalItemPurchase.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWPayPalItemPurchase.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWPayPalItemPurchase.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWPayPalItemPurchase.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWPayPalItemPurchase.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 var
   i : integer;
@@ -978,12 +1018,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWPayPalAddToCart.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWPayPalAddToCart.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWPayPalAddToCart.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWPayPalAddToCart.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWPayPalAddToCart.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWPayPalAddToCart.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 var
   i : integer;
@@ -1133,12 +1177,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWPayPalViewCart.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWPayPalViewCart.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWPayPalViewCart.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWPayPalViewCart.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWPayPalViewCart.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWPayPalViewCart.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 begin
 {
@@ -1224,12 +1272,16 @@ end;
 
 {$IFDEF VERCLASS5}
 function TArcIWPayPalSubscriptionCancel.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWPayPalSubscriptionCancel.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWPayPalSubscriptionCancel.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWPayPalSubscriptionCancel.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWPayPalSubscriptionCancel.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWPayPalSubscriptionCancel.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 begin
 {

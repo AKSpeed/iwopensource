@@ -28,6 +28,7 @@
 //                 Source.                                                    //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 - AK' Added IW 15.0.1  & xe10 Berlin                         //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -43,7 +44,11 @@ interface
 {$I IWVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWExtCtrls,
+  Windows, Messages, SysUtils, Classes, IWControl,
+  {$IF CompilerVersion < 27.0} //CompilerVersion: Extended = 31 Xe10;   VER270 = xe6
+   Controls,
+  {$IFEND}
+  {$IFDEF IWVERSION150} IWCompExtCtrls, {$ELSE} IWExtCtrls, {$IFEND} //15
   IWScriptEvents, IWHTMLTag, IWHTMLControls,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, {$ENDIF}
   {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
@@ -69,13 +74,17 @@ type
     destructor Destroy; override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
   published
     property TargetOptions: TIWURLTarget read FTargetOptions write FTargetOptions;
     property TerminateApp: boolean read FTerminateApp write FTerminateApp;
@@ -105,13 +114,17 @@ type
     destructor Destroy; override;
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
   published
     property TargetOptions: TIWURLTarget read FTargetOptions write FTargetOptions;
     property TerminateApp: boolean read FTerminateApp write FTerminateApp;
@@ -124,7 +137,12 @@ type
 
 implementation
 
+{$IFNDEF UNICODE}
 uses SWSystem;
+  //You can obtain the full path to an application executable using:
+  // Delphi 2010 declare Uses SWSystem; <<< gsAppPat
+  // Delphi Xe declare Uses IWSystem ;
+{$ENDIF}
 
 { TArcIWImageURL }
 
@@ -160,12 +178,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWImageURL.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWImageURL.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWImageURL.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWImageURL.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWImageURL.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWImageURL.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 var
   LURL: string;
@@ -321,12 +343,16 @@ end;
 
 {$IFDEF IWVERCLASS5}
 function TArcIWImageFileURL.RenderHTML: TIWHTMLTag;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWImageFileURL.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWImageFileURL.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWImageFileURL.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWImageFileURL.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWImageFileURL.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 {$ENDIF}
 var
   LURL: string;

@@ -56,6 +56,7 @@
 //                 you can pump it up at the risk of bigger file sizes.       //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 - AK' Added IW 15.0.1  & xe10 Berlin                         //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -71,10 +72,20 @@ interface
 {$I IWVersion.inc}
 
 uses
-  Windows, Messages, Graphics, SysUtils, Classes, {$IFNDEF CLR}JPeg, {$ENDIF}IWControl, IWTypes,
-  {$IFDEF VER130} FileCtrl, {$ENDIF} ArcIWOperaFix, SWSystem,
+  Windows, Messages,  SysUtils, Classes,
+  {$IF CompilerVersion >= 27.0} Vcl.Graphics,{$ELSE} Graphics, {$ENDIF} //xe10 Graphics
+  {$IFNDEF CLR}JPeg, {$ENDIF}IWControl, IWTypes,
+  {$IFDEF VER130} FileCtrl, {$ENDIF} ArcIWOperaFix,
+{$IFNDEF UNICODE}
+  SwSystem,
+  //You can obtain the full path to an application executable using:
+  // Delphi 2010 declare Uses SWSystem; <<< gsAppPat
+  // Delphi Xe declare Uses IWSystem ;
+{$ENDIF}
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
-  {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF} {$IFDEF IWVERSION72} IWStreams, {$ENDIF}
+  {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
+  {$IFDEF IWVERSION150} IW.Common.RenderStream, {$ELSE}
+   {$IFDEF IWVERSION72} IWStreams, {$ENDIF} {$ENDIF}
   IWHTMLTag;
 
 type
@@ -112,13 +123,17 @@ type
   public
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
     constructor Create(AOwner: TComponent); override;
     property Friend : TArcIWFilledBox read FFriend write FFriend;
   published
@@ -139,7 +154,15 @@ type
 
 implementation
 
-uses SWStrings, IWAppForm;
+uses
+
+//Warning! v15 iff defined in  IW.Common.System & IW.Common.SysTools !!!
+
+
+{$IFDEF IWVERSION150} ArcIWBrowserDummy, IWBaseForm, IW.Common.SysTools, {$ENDIF}
+{$IFNDEF UNICODE} SWStrings, // Delphi Xe
+{$ELSE} IW.Common.Strings, {$ENDIF}
+ IWAppForm;
 
 var
   FilePath : string;
@@ -386,37 +409,37 @@ begin
   if Assigned(FOnMouseDown) then begin
     case WebApplication.Browser of
       brIE:
-        begin
-          Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
-                                 'event.offsetX + '','' + event.offsetY, '+
-                                 iif(DoSubmitValidation, 'true', 'false')+','''+
-                                 Confirmation+''');');
-        end;
+	begin
+	  Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
+				 'event.offsetX + '','' + event.offsetY, '+
+				 iif(DoSubmitValidation, 'true', 'false')+','''+
+				 Confirmation+''');');
+	end;
       brNetscape6:
         begin
-          LTag := TIWHTMLTag.CreateTag('A');
+	  LTag := TIWHTMLTag.CreateTag('A');
           try
             LTag.AddStringParam('HREF', '#');
             LTag.AddStringParam('OnMouseOver', 'return ImageSetEvent(this,''' + HTMLName + ''''
-              + ',' + iif(DoSubmitValidation, 'true', 'false')
-              + ',' + '''' + Confirmation + ''''
-              + ');"');
-            LTag.Contents.AddText(Result.Render);
-          except
-            FreeAndNil(LTag);
-            raise;
-          end;
-          FreeAndNil(Result);
-          Result := LTag;
-        end;
+	      + ',' + iif(DoSubmitValidation, 'true', 'false')
+	      + ',' + '''' + Confirmation + ''''
+	      + ');"');
+	    LTag.Contents.AddText(Result.Render);
+	  except
+	    FreeAndNil(LTag);
+	    raise;
+	  end;
+	  FreeAndNil(Result);
+	  Result := LTag;
+	end;
       brOpera:
-        begin
-          Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
-                                 '(event.clientX-SubmitForm.'+HTMLName+'.style.pixelLeft)+ '','' + '+
-                                 '(event.clientY-SubmitForm.'+HTMLName+'.style.pixelTop), '+
-                                 iif(DoSubmitValidation, 'true', 'false')+','''+
-                                 Confirmation+''');');
-        end;
+	begin
+	  Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
+				 '(event.clientX-SubmitForm.'+HTMLName+'.style.pixelLeft)+ '','' + '+
+				 '(event.clientY-SubmitForm.'+HTMLName+'.style.pixelTop), '+
+				 iif(DoSubmitValidation, 'true', 'false')+','''+
+				 Confirmation+''');');
+	end;
     end;
   end;
 
@@ -426,12 +449,22 @@ begin
     Result.AddStringParam('onClick','return SubmitClickConfirm('''+HTMLName+''','''', true, '''')');
   end;
 end;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWFilledBox.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWFilledBox.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWFilledBox.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+  const
+   cnFilesPth15 = 'files/~~~';
+//v15 root path: \wwwroot\Files\~~~IWFormTest150_ArcIWFilledBox1.jpg
+//    web  url:          /files/~~~IWFormTest150_ArcIWFilledBox1.jpg
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWFilledBox.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWFilledBox.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+  const
+   cnFilesPth15 = '/files/~~~';
+ {$ENDIF} //15
 var
   LTag: TIWHTMLTag;
   LStream: TIWRenderStream;
@@ -442,54 +475,56 @@ begin
   Result.AddStringParam('height', IntToStr(Height)+'px');
   Result.AddIntegerParam('border', 0);
   if not Assigned(FFriend) then
-    Result.AddStringParam('src',AContext.WebApplication.AppURLBase+'/files/~~~'+TComponent(Parent).Name+'_'+Name+'.jpg')
+    Result.AddStringParam('src',AContext.WebApplication.AppURLBase+cnFilesPth15+TComponent(Parent).Name+'_'+Name+'.jpg')
   else
-    Result.AddStringParam('src',AContext.WebApplication.AppURLBase+'/files/~~~'+TComponent(FFriend.Parent).Name+'_'+FFriend.Name+'.jpg');
+    Result.AddStringParam('src',AContext.WebApplication.AppURLBase+cnFilesPth15+TComponent(FFriend.Parent).Name+'_'+FFriend.Name+'.jpg');
 
   if Assigned(FOnMouseDown) then begin
-    case AContext.Browser of
+    case
+     {$IFDEF IWVERSION150} IWBrowserDummyCheck(TIWAppForm(Owner).WebApplication.Browser)
+     {$ELSE}		   AContext.Browser  {$ENDIF} of //SupportedBrowsers
       brIE:
-        begin
-          Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
-                                 'event.offsetX + '','' + event.offsetY, '+
-                                 iif(DoSubmitValidation, 'true', 'false')+','''+
-                                 Confirmation+''');');
-        end;
+	begin
+	  Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
+				 'event.offsetX + '','' + event.offsetY, '+
+				 iif(DoSubmitValidation, 'true', 'false')+','''+
+				 Confirmation+''');');
+	end;
       brNetscape6:
-        begin
-          LTag := TIWHTMLTag.CreateTag('A');
-          try
-            LTag.AddStringParam('HREF', '#');
-            LTag.AddStringParam('OnMouseOver', 'return ImageSetEvent(this,''' + HTMLName + ''''
-              + ',' + iif(DoSubmitValidation, 'true', 'false')
-              + ',' + '''' + Confirmation + ''''
-              + ');"');
-            {$IFDEF IWVERSION72}
-              LStream := TIWRenderStream.Create;
-              try
-                Result.Render(LStream);
-                LTag.Contents.AddText(LStream.Extract);
-              finally
-                LSTream.Free;
-              end;
-            {$ELSE}
-              LTag.Contents.AddText(Result.Render);
-            {$ENDIF}
-          except
-            FreeAndNil(LTag);
-            raise;
-          end;
-          FreeAndNil(Result);
-          Result := LTag;
-        end;
+	begin
+	  LTag := TIWHTMLTag.CreateTag('A');
+	  try
+	    LTag.AddStringParam('HREF', '#');
+	    LTag.AddStringParam('OnMouseOver', 'return ImageSetEvent(this,''' + HTMLName + ''''
+	      + ',' + iif(DoSubmitValidation, 'true', 'false')
+	      + ',' + '''' + Confirmation + ''''
+	      + ');"');
+	    {$IFDEF IWVERSION72}
+	      LStream := TIWRenderStream.Create;
+	      try
+		Result.Render(LStream);
+		LTag.Contents.AddText(LStream.Extract);
+	      finally
+		LSTream.Free;
+	      end;
+	    {$ELSE}
+	      LTag.Contents.AddText(Result.Render);
+	    {$ENDIF}
+	  except
+	    FreeAndNil(LTag);
+	    raise;
+	  end;
+	  FreeAndNil(Result);
+	  Result := LTag;
+	end;
       brOpera:
-        begin
-          Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
-                                 '(event.clientX-SubmitForm.'+HTMLName+'.style.pixelLeft)+ '','' + '+
-                                 '(event.clientY-SubmitForm.'+HTMLName+'.style.pixelTop), '+
-                                 iif(DoSubmitValidation, 'true', 'false')+','''+
-                                 Confirmation+''');');
-        end;
+	begin
+	  Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
+				 '(event.clientX-SubmitForm.'+HTMLName+'.style.pixelLeft)+ '','' + '+
+				 '(event.clientY-SubmitForm.'+HTMLName+'.style.pixelTop), '+
+				 iif(DoSubmitValidation, 'true', 'false')+','''+
+				 Confirmation+''');');
+	end;
     end;
   end;
 
@@ -499,7 +534,7 @@ begin
     Result.AddStringParam('onClick','return SubmitClickConfirm('''+HTMLName+''','''', true, '''')');
   end;
 end;
-{$ENDIF}
+{$ENDIF} //IWVERCLASS5
 
 procedure TArcIWFilledBox.Resize;
 begin

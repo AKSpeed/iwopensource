@@ -1,11 +1,12 @@
 // remove the . from the define that corresponds to your IW version.
+//    05/06/2019 - AK' Added IW 15.0.1  & xe10 Berlin:   IWVERSION150
 
 {.$DEFINE IWVERSION5}
 {.$DEFINE IWVERSION51}
 {.$DEFINE IWVERSION60}
 {.$DEFINE IWVERSION70}
-{$DEFINE IWVERSION72}
-
+{.$DEFINE IWVERSION72}
+{$DEFINE IWVERSION150}  //15.0.1 IWBaseRenderContext
 
 // Don't change these declarations.
 
@@ -21,6 +22,14 @@
   {$DEFINE IWVERCLASS6}
 {$ENDIF}
 
+
+{$IFDEF IWVERSION150}
+  {.$DEFINE IWVERSION72}
+  {$DEFINE IWVERSION70}
+{$ENDIF}
+
 {$IFDEF IWVERSION72}
   {$DEFINE IWVERSION70}
 {$ENDIF}
+
+
