@@ -19,6 +19,7 @@
 //    07/27/2002 - Released to TArcIWOperaGrid to Open Source.                //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 IW 15.0.1 Opera v17 components not supported! AK'            //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -34,17 +35,23 @@ interface
 {$I IWVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWGrids, IWTypes,
+  Windows, Messages, SysUtils, Classes, IWControl,  IWTypes,
+  {$IF CompilerVersion < 27.0} //CompilerVersion: Extended = 31 Xe10;   VER270 = xe6
+   Controls,
+  {$IFEND}
+  {$IFDEF IWVERSION150} IWCompGrids, {$ELSE}  IWGrids, {$IFEND}
   ArcIWOperaFix,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
   IWHTMLTag;
+
 
 type
   TArcIWOperaGrid = class(TIWGrid)
   private
   protected
   public
+{$IFNDEF IWVERSION150}
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
     {$ELSE}
@@ -55,6 +62,7 @@ type
     {$ENDIF}
     {$ENDIF}
     constructor Create(AOwner: TComponent); override;
+{$ENDIF}
   published
   end;
 
@@ -63,6 +71,10 @@ implementation
 uses IWAppForm;
 
 { TArcIWOperaGrid }
+
+{$IFNDEF IWVERSION150}
+//v15 deprecated
+//    property SupportedBrowsers: TIWBrowsersDummy write SetSupportedBrowsers;
 
 constructor TArcIWOperaGrid.Create(AOwner: TComponent);
 var
@@ -97,6 +109,7 @@ function TArcIWOperaGrid.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLT
 begin
     Result := inherited RenderHTML(AContext);
 end;
+{$ENDIF}
 {$ENDIF}
 
 end.

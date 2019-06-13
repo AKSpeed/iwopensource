@@ -26,6 +26,7 @@
 //    07/11/2002 - Released to TArcIWScreenInfo to Open Source.               //
 //    05/12/2003 - Removed support for IW4, Added support for IW6             //
 //    10/02/2003 - Added support for IW7                                      //
+//    05/06/2019 - AK' Added IW 15.0.1  & xe10 Berlin                         //
 //                                                                            //
 //  License:                                                                  //
 //    This code is covered by the Mozilla Public License 1.1 (MPL 1.1)        //
@@ -41,7 +42,9 @@ unit ArcIWScreenInfo;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWTypes,
+  Windows, Messages, SysUtils, Classes,
+  {$IF CompilerVersion >= 27.0} Vcl.Controls,{$ELSE} Controls, {$ENDIF} //xe10 Graphics
+  IWControl, IWTypes,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF IWVERSION70} IWRenderContext, {$ENDIF}
   IWHTMLTag;
@@ -68,13 +71,17 @@ type
   public
     {$IFDEF IWVERCLASS5}
     function RenderHTML: TIWHTMLTag; override;
-    {$ELSE}
-    {$IFDEF IWVERSION70}
-    function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
-    {$ELSE}
-    function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
-    {$ENDIF}
-    {$ENDIF}
+    {$ELSE}  //72
+     {$IFDEF IWVERSION150} //15
+      function RenderHTML(AContext: TIWCompContext): TIWHTMLTag; override;
+     {$ELSE}   //15
+      {$IFDEF IWVERSION70} //70
+       function RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag; override;
+      {$ELSE}
+       function RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; override;
+      {$ENDIF} //70
+     {$ENDIF} //15
+    {$ENDIF} //72
     constructor Create(AOwner : TComponent); override;
   published
     property ClientScreen : TArcIWClientScreen read FClientScreen;
@@ -103,24 +110,28 @@ begin
   Result.AddStringParam('Value','blankvalue');
 
   sScript := 'document.SubmitForm.'+Uppercase(Name)+'.value="'+
-             'availHeight="+window.screen.availHeight+",'+
-             'availLeft="+window.screen.availLeft+",'+
-             'availTop="+window.screen.availTop+",'+
-             'availWidth="+window.screen.availWidth+",'+
-             'colorDepth="+window.screen.colorDepth+",'+
-             'height="+window.screen.height+",'+
-             'pixelDepth="+window.screen.pixelDepth+",'+
-             'top="+window.screen.top+",'+
-             'width="+window.screen.width;';
+	     'availHeight="+window.screen.availHeight+",'+
+	     'availLeft="+window.screen.availLeft+",'+
+	     'availTop="+window.screen.availTop+",'+
+	     'availWidth="+window.screen.availWidth+",'+
+	     'colorDepth="+window.screen.colorDepth+",'+
+	     'height="+window.screen.height+",'+
+	     'pixelDepth="+window.screen.pixelDepth+",'+
+	     'top="+window.screen.top+",'+
+	     'width="+window.screen.width;';
 
   AddToInitProc(sScript);
 end;
-{$ELSE}
-{$IFDEF IWVERSION70}
-function TArcIWScreenInfo.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
-{$ELSE}
-function TArcIWScreenInfo.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
-{$ENDIF}
+{$ELSE} //IWVERCLASS5
+ {$IFDEF IWVERSION150} //15
+ function TArcIWScreenInfo.RenderHTML(AContext: TIWCompContext): TIWHTMLTag;
+ {$ELSE}  //15
+  {$IFDEF IWVERSION70}
+  function TArcIWScreenInfo.RenderHTML(AContext: TIWBaseComponentContext): TIWHTMLTag;
+  {$ELSE}
+  function TArcIWScreenInfo.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag;
+  {$ENDIF}
+ {$ENDIF} //15
 var
   sScript : string;
 begin
@@ -129,24 +140,31 @@ begin
   Result.AddStringParam('Value','blankvalue');
 
   sScript := 'top.FindElem("' + HTMLName + '").value ="' +
-             'availHeight="+window.screen.availHeight+",'+
-             'availLeft="+window.screen.availLeft+",'+
-             'availTop="+window.screen.availTop+",'+
-             'availWidth="+window.screen.availWidth+",'+
-             'colorDepth="+window.screen.colorDepth+",'+
-             'height="+window.screen.height+",'+
-             'pixelDepth="+window.screen.pixelDepth+",'+
-             'top="+window.screen.top+",'+
-             'width="+window.screen.width;';
+	     'availHeight="+window.screen.availHeight+",'+
+	     'availLeft="+window.screen.availLeft+",'+
+	     'availTop="+window.screen.availTop+",'+
+	     'availWidth="+window.screen.availWidth+",'+
+	     'colorDepth="+window.screen.colorDepth+",'+
+	     'height="+window.screen.height+",'+
+	     'pixelDepth="+window.screen.pixelDepth+",'+
+	     'top="+window.screen.top+",'+
+	     'width="+window.screen.width;';
 
 //  sScript := sScript+#13+'alert("set value to: "+document.SubmitForm.'+Uppercase(Name)+'.value);';
 
+ {$IFDEF IWVERSION150} //15
+//v15 Not used anymore This is ignored, kept only for streaming compat
+//    TIWFormUpdateMode = (umAll, umPartial);
+    AContext.AddToInitProc(sScript);
+ {$ELSE}  //15
   case TIWPageContext40(AContext.PageCOntext).UpdateMode of
-    umPartial: TIWComponent40Context(Acontext).AddToUpdateInitProc(sScript);
+    umPartial: TIWComponent40Context(Acontext). .AddToUpdateInitProc(sScript);
     umAll:     TIWComponent40Context(Acontext).AddToInitProc(sScript);
   end;
+ {$ENDIF}
 end;
 {$ENDIF}
+
 
 procedure TArcIWScreenInfo.SetValue(const AValue: string);
 var

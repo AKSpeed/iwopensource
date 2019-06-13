@@ -1,0 +1,59 @@
+package ArcIWOpenSource_D_xe6_IW150;
+
+{$R *.res}
+{$R *.otares}
+{$R 'ArcIWEmbeddedHTML.dcr'}
+{$R 'ArcIWFilledBox.dcr'}
+{$R 'ArcIWScreenInfo.dcr'}
+{$R 'ArcIWToolWindow.dcr'}
+{$R 'ArcIWPageController.dcr'}
+{$R 'ArcIWPaypalLink.dcr'}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'Arcana IntraWeb Open Source Pack'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  Intraweb_15_DXE6;
+
+contains
+  ArcIWEmbeddedHTML in 'ArcIWEmbeddedHTML.pas',
+  ArcIWFilledBox in 'ArcIWFilledBox.pas',
+  ArcIWOperaFix in 'ArcIWOperaFix.pas',
+  ArcIWPageController in 'ArcIWPageController.pas',
+  ArcIWScreenInfo in 'ArcIWScreenInfo.pas',
+  ArcIWToolWindow in 'ArcIWToolWindow.pas',
+  ArcIWOperaMemo in 'ArcIWOperaMemo.pas',
+  ArcIWOperaButton in 'ArcIWOperaButton.pas',
+  ArcIWOperaComboBox in 'ArcIWOperaComboBox.pas',
+  ArcIWOperaEdit in 'ArcIWOperaEdit.pas',
+  ArcIWOperaGrid in 'ArcIWOperaGrid.pas',
+  ArcIWOperaListbox in 'ArcIWOperaListbox.pas',
+  ArcIWPaypalLink in 'ArcIWPaypalLink.pas',
+  ArcIWImageURL in 'ArcIWImageURL.pas',
+  ArcIWBrowserDummy in 'ArcIWBrowserDummy.pas';
+
+end.
