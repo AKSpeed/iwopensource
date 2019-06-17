@@ -9,7 +9,8 @@ IWOpenSource150 branch from https://github.com/deadserious/iwopensource
 
 IWOpenSource for Intraweb v15.0.10 & v15.0.20
 
-IWOpenSource compiled with  Delphi XE6,  XE10.1 Berlin
+IWOpenSource compiled with  Delphi XE6,  XE10.1 Berlin.
+
 For older Delphi you can try change value {$IF CompilerVersion >= 27.0} to a lower value.
 
 Complety tested ToolWindow for: FireFox v52, Chrome, Safary, Opera 17, IE11  
