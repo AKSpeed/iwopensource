@@ -1,9 +1,10 @@
 # iwopensource150
 Automatically exported from code.google.com/p/iwopensource
 
-10.06.2019 
+10.06.2019 Andrey Kolesov 
 IWOpenSource150 branch from https://github.com/deadserious/iwopensource
-Andrey Kolesov 
+
+
 
 
 IWOpenSource for Intraweb v15.0.10 & v15.0.20
