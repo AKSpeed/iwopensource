@@ -15,6 +15,7 @@ For older Delphi you can try change value {$IF CompilerVersion >= 27.0} to a low
 
 Complety tested ToolWindow for: FireFox v52, Chrome, Safary, Opera 17, IE11  
 Don't work in: Vivaldi 2.5
+
 Partly work in a mobile web browser's - try click and move a tool window, some times)
 
 Opera compoents don't work - depricated.
