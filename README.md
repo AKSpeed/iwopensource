@@ -16,3 +16,7 @@ Don't work in: Vivaldi 2.5
 Partly work in a mobile brousers - try click and move a tool window, some times)
 
 Opera compoents don't work - depricated.
+
+
+Atozed Documentation - Migrating to IntraWeb XIV and XV<
+http://docs.atozed.com/docs.dll/development/Migrating%20to%20IntraWeb%20XIV.html
